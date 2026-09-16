@@ -1,25 +1,26 @@
 /*
 =========================================================
               OLED COIN COLLECTOR
-                 ENEMY EDITION
+                 ENEMY CHALLENGE
 =========================================================
 
 GOAL
 
-Collect as many coins as possible while avoiding
-the enemy!
+Collect the coin while avoiding the enemy!
 
-The enemy slowly follows the player.
+The player and coin are already working.
+
+YOUR JOB:
+
+• Design the enemy
+• Make the enemy chase the player
+• Detect when the enemy catches you
 
 ---------------------------------------------------------
-WHAT YOU WILL PRACTISE
+NEW CONCEPTS
 
-• Variables
-• if statements
-• Joystick movement
-• OLED drawing
+• Simple enemy movement
 • AABB collision
-• Random positions
 
 =========================================================
 */
@@ -35,7 +36,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 
 // ------------------------------------------------------
-// Joystick Pins
+// Joystick
 // ------------------------------------------------------
 
 const int JOY_X = A1;
@@ -69,31 +70,27 @@ int coinY = 20;
 
 const int coinSize = 4;
 
+int score = 0;
+
 
 // ------------------------------------------------------
 // Enemy
 // ------------------------------------------------------
 
+// ======================================================
 // STEP 1
 //
-// Create the enemy's X and Y position,
-// and its size.
+// Create the enemy.
 //
-// Hints:
+// The enemy needs:
 //
-// enemyX
-// enemyY
-// enemySize
+// • enemyX
+// • enemyY
+// • enemySize
 //
-// Give it a starting position on the screen.
-// ------------------------------------------------------
-
-
-// ------------------------------------------------------
-// Score
-// ------------------------------------------------------
-
-int score = 0;
+// Give it a starting position somewhere on the screen.
+//
+// ======================================================
 
 
 // ======================================================
@@ -139,18 +136,25 @@ void drawCoin()
 
 // STEP 2
 //
-// Create a function called drawEnemy().
+// Design your enemy!
+// //
+// Create:
 //
-// Draw the enemy as a simple rectangle.
+// void drawEnemy()
 //
-// Hint:
+// Your enemy should fit inside enemySize.
 //
-// display.fillRect(...)
+// You can use:
 //
-// Use the enemy's:
-// • X
-// • Y
-// • Size
+// display.fillRect()
+// display.drawRect()
+// display.fillCircle()
+// display.drawCircle()
+// display.drawLine()
+// display.drawPixel()
+//
+// Try to make your enemy look interesting.
+//
 // ======================================================
 
 
@@ -180,18 +184,105 @@ void loop()
 {
 
   // ====================================================
+  // PLAYER MOVEMENT
+  //
+  // This code is already finished.
+  //
+  // ====================================================
+
+  int xValue = 1023 - analogRead(JOY_X);
+  int yValue = analogRead(JOY_Y);
+
+
+  if (xValue < 400)
+  {
+    playerX -= playerSpeed;
+  }
+
+  if (xValue > 600)
+  {
+    playerX += playerSpeed;
+  }
+
+  if (yValue < 400)
+  {
+    playerY -= playerSpeed;
+  }
+
+  if (yValue > 600)
+  {
+    playerY += playerSpeed;
+  }
+
+
+  playerX = constrain(
+    playerX,
+    0,
+    SCREEN_WIDTH - playerSize
+  );
+
+  playerY = constrain(
+    playerY,
+    9,
+    SCREEN_HEIGHT - playerSize
+  );
+
+
+  // ====================================================
+  // COIN
+  //
+  // This code is already finished.
+  //
+  // Remember this collision from the previous lesson.
+  // ====================================================
+
+  if (playerX < coinX + coinSize &&
+      playerX + playerSize > coinX &&
+      playerY < coinY + coinSize &&
+      playerY + playerSize > coinY)
+  {
+    score++;
+
+    coinX = random(
+      0,
+      SCREEN_WIDTH - coinSize
+    );
+
+    coinY = random(
+      10,
+      SCREEN_HEIGHT - coinSize
+    );
+  }
+
+
+  // ====================================================
   // STEP 3
   //
-  // READ THE JOYSTICK
+  // MAKE THE ENEMY CHASE THE PLAYER
   //
-  // Create xValue and yValue.
+  // The enemy needs to decide whether it should
+  // move LEFT, RIGHT, UP or DOWN.
   //
-  // Remember:
-  // The X axis needs to be flipped.
+  // Ask four questions:
   //
-  // Hint:
+  // Is enemyX smaller than playerX?
+  // Is enemyX bigger than playerX?
   //
-  // 1023 - analogRead(...)
+  // Is enemyY smaller than playerY?
+  // Is enemyY bigger than playerY?
+  //
+  // Hints:
+  //
+  // if(enemyX < playerX)
+  //
+  // if(enemyX > playerX)
+  //
+  // if(enemyY < playerY)
+  //
+  // if(enemyY > playerY)
+  //
+  // Use enemySpeed when moving.
+  //
   // ====================================================
 
 
@@ -199,17 +290,50 @@ void loop()
   // ====================================================
   // STEP 4
   //
-  // MOVE THE PLAYER
+  // AABB COLLISION
   //
-  // This is revision.
+  // How does the Arduino know the enemy
+  // has caught the player?
   //
-  // Move:
-  // • Left
-  // • Right
-  // • Up
-  // • Down
+  // Imagine invisible boxes around them:
   //
-  // Use playerSpeed.
+  //       PLAYER
+  //       ┌──────┐
+  //       │      │
+  //       └──────┘
+  //
+  //                 ENEMY
+  //                 ┌──────┐
+  //                 │      │
+  //                 └──────┘
+  //
+  // The boxes collide when they overlap.
+  //
+  // First check HORIZONTAL overlap:
+  //
+  // playerX < enemyX + enemySize
+  //
+  // AND
+  //
+  // playerX + playerSize > enemyX
+  //
+  // Then check VERTICAL overlap:
+  //
+  // playerY < enemyY + enemySize
+  //
+  // AND
+  //
+  // playerY + playerSize > enemyY
+  //
+  // ALL FOUR conditions must be true.
+  //
+  // Hint:
+  //
+  // if(condition1 &&
+  //    condition2 &&
+  //    condition3 &&
+  //    condition4)
+  //
   // ====================================================
 
 
@@ -217,113 +341,52 @@ void loop()
   // ====================================================
   // STEP 5
   //
-  // KEEP THE PLAYER ON SCREEN
+  // WHAT HAPPENS WHEN THE ENEMY CATCHES YOU?
+  //
+  // Choose what you think should happen.
+  //
+  // A simple choice:
+  //
+  // • Reset the player
+  // • Reset the score
+  // • Move the enemy to a new position
+  //
+  // ====================================================
+
+
+
+  // ====================================================
+  // DRAW
+  // ====================================================
+
+  display.clearDisplay();
+
+  drawPlayer();
+  drawCoin();
+
+  // STEP 6
+  //
+  // Draw your enemy.
   //
   // Hint:
   //
-  // constrain(...)
-  // ====================================================
+  // drawEnemy();
+  //
 
 
+  // ----------------------------------------------------
+  // SCORE
+  // ----------------------------------------------------
 
-  // ====================================================
-  // STEP 6
-  //
-  // COLLECT THE COIN
-  //
-  // Use the AABB collision code from
-  // the previous lesson.
-  //
-  // When the player touches the coin:
-  //
-  // • score increases
-  // • coin gets a new random position
-  // ====================================================
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+
+  display.print("Score: ");
+  display.print(score);
 
 
-
-  // ====================================================
-  // STEP 7
-  //
-  // MOVE THE ENEMY
-  //
-  // Make the enemy follow the player.
-  //
-  // Ask:
-  //
-  // Is enemyX less than playerX?
-  //
-  // Is enemyX greater than playerX?
-  //
-  // Then do the same thing for Y.
-  //
-  // Hints:
-  //
-  // if(enemyX < playerX)
-  // if(enemyX > playerX)
-  //
-  // if(enemyY < playerY)
-  // if(enemyY > playerY)
-  //
-  // Move using enemySpeed.
-  // ====================================================
-
-
-
-  // ====================================================
-  // STEP 8
-  //
-  // CHECK FOR ENEMY COLLISION
-  //
-  // Use AABB again.
-  //
-  // This time, compare:
-  //
-  // Player Box
-  // +
-  // Enemy Box
-  //
-  // What should happen when they overlap?
-  // ====================================================
-
-
-
-  // ====================================================
-  // STEP 9
-  //
-  // RESET THE GAME AFTER BEING CAUGHT
-  //
-  // When the enemy catches the player:
-  //
-  // • Reset the score
-  // • Reset the player position
-  // • Move the enemy somewhere else
-  //
-  // Use random() for the enemy's new position.
-  // ====================================================
-
-
-
-  // ====================================================
-  // STEP 10
-  //
-  // DRAW EVERYTHING
-  //
-  // Clear the screen.
-  //
-  // Draw:
-  // • Player
-  // • Coin
-  // • Enemy
-  //
-  // Display the score.
-  //
-  // Finally:
-  //
-  // display.display();
-  // ====================================================
-
-
+  display.display();
 
   delay(20);
 
