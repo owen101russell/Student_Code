@@ -1,28 +1,32 @@
 /*
 =========================================================
               OLED COIN COLLECTOR
+                 ENEMY CHALLENGE
 =========================================================
 
 GOAL
 
-Turn last week's character movement project into a game!
+Collect coins while avoiding an enemy!
 
-Move your character around the screen and collect the
-coin.
+First, rebuild the coin collector you made before.
 
-Each time you collect the coin:
-
-• Your score increases.
-• The coin appears somewhere else.
+Then create your own enemy and make it chase you.
 
 ---------------------------------------------------------
-WHAT YOU WILL LEARN
+REVISION
 
-• Revising joystick movement
-• Drawing another object
-• Detecting collisions
-• Using random()
-• Keeping score
+• Joystick movement
+• if statements
+• Variables
+• random()
+• OLED drawing
+• AABB collision
+
+---------------------------------------------------------
+NEW
+
+• Enemy movement
+• Enemy collision
 
 =========================================================
 */
@@ -36,12 +40,22 @@ WHAT YOU WILL LEARN
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
+
 // ------------------------------------------------------
-// Joystick Pins
+// Joystick
 // ------------------------------------------------------
 
-const int JOY_X = A0;
-const int JOY_Y = A1;
+const int JOY_X = A1;
+const int JOY_Y = A0;
+
+
+// ------------------------------------------------------
+// Game Settings
+// ------------------------------------------------------
+
+const int playerSpeed = 2;
+const int enemySpeed = 1;
+
 
 // ------------------------------------------------------
 // Player
@@ -50,6 +64,9 @@ const int JOY_Y = A1;
 int playerX = 60;
 int playerY = 30;
 
+const int playerSize = 6;
+
+
 // ------------------------------------------------------
 // Coin
 // ------------------------------------------------------
@@ -57,37 +74,97 @@ int playerY = 30;
 int coinX = 30;
 int coinY = 20;
 
-// ------------------------------------------------------
-// Score
-// ------------------------------------------------------
+const int coinSize = 4;
 
 int score = 0;
 
+
 // ------------------------------------------------------
-// Draw the Player
+// Enemy
 // ------------------------------------------------------
+
+// STEP 1
+//
+// Create the enemy's:
+// • X position
+// • Y position
+// • Size
+//
+// Give the enemy a starting position somewhere
+// on the screen.
+//
+// Hints:
+//
+// enemyX
+// enemyY
+// enemySize
+//
+// ------------------------------------------------------
+
+
+// ======================================================
+// DRAW PLAYER
+// ======================================================
 
 void drawPlayer()
 {
-  display.fillRect(playerX, playerY, 6, 6, SSD1306_WHITE);
+  display.fillRect(
+    playerX,
+    playerY,
+    playerSize,
+    playerSize,
+    SSD1306_WHITE
+  );
 }
 
-// ------------------------------------------------------
-// Draw the Coin
-// ------------------------------------------------------
+
+// ======================================================
+// DRAW COIN
+// ======================================================
 
 void drawCoin()
 {
-  display.fillCircle(coinX, coinY, 2, SSD1306_WHITE);
+  display.fillCircle(
+    coinX,
+    coinY,
+    2,
+    SSD1306_WHITE
+  );
 }
 
-// ------------------------------------------------------
-// Setup
-// ------------------------------------------------------
+
+// ======================================================
+// DRAW ENEMY
+// ======================================================
+
+// STEP 2
+//
+// Design your enemy!
+//
+// Create:
+//
+// void drawEnemy()
+//
+// Use the OLED drawing functions you already know.
+//
+// Try to make it look different from the player.
+//
+// Keep it inside the enemySize box.
+//
+// ======================================================
+
+
+
+// ======================================================
+// SETUP
+// ======================================================
 
 void setup()
 {
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.begin(
+    SSD1306_SWITCHCAPVCC,
+    0x3C
+  );
 
   display.clearDisplay();
   display.display();
@@ -95,165 +172,184 @@ void setup()
   randomSeed(analogRead(A3));
 }
 
-// ------------------------------------------------------
-// Main Loop
-// ------------------------------------------------------
+
+// ======================================================
+// MAIN LOOP
+// ======================================================
 
 void loop()
 {
 
-  //------------------------------------------------------
-  // STEP 1
+  // ====================================================
+  // STEP 3 — READ THE JOYSTICK
+  // ====================================================
   //
-  // Read the joystick.
-  //
-  // Create TWO variables:
+  // Create:
   //
   // xValue
   // yValue
   //
+  // Remember:
+  // The X axis is flipped.
+  //
   // Hint:
   //
-  // analogRead(...)
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 2
+  // 1023 - analogRead(...)
   //
-  // Move the player.
-  //
-  // Use if statements to move:
-  //
-  // Left
-  // Right
-  // Up
-  // Down
-  //
-  // This is revision from last lesson.
-  //------------------------------------------------------
+  // ====================================================
 
 
 
-  //------------------------------------------------------
-  // STEP 3
+  // ====================================================
+  // STEP 4 — MOVE THE PLAYER
+  // ====================================================
   //
-  // Keep the player on the screen.
+  // Revision!
+  //
+  // Move:
+  // • Left
+  // • Right
+  // • Up
+  // • Down
+  //
+  // Use playerSpeed.
+  //
+  // ====================================================
+
+
+
+  // ====================================================
+  // STEP 5 — KEEP THE PLAYER ON SCREEN
+  // ====================================================
   //
   // Hint:
   //
   // constrain(...)
-  //------------------------------------------------------
+  //
+  // ====================================================
 
 
 
-  //------------------------------------------------------
-  // STEP 4
+  // ====================================================
+  // STEP 6 — COLLECT THE COIN
+  // ====================================================
   //
-  // Has the player collected the coin?
+  // Use AABB collision.
   //
-  // The player has collected it when BOTH
-  // the X position and Y position are close
-  // to the coin.
+  // The coin is a small box.
   //
-  // Hint:
+  // When the player touches the coin:
   //
-  // &&
-  //------------------------------------------------------
+  // • Increase score
+  // • Give the coin a new random position
+  //
+  // Remember:
+  //
+  // Two boxes must overlap:
+  //
+  // horizontally AND vertically.
+  //
+  // ====================================================
 
 
 
-  //------------------------------------------------------
-  // STEP 5
+  // ====================================================
+  // STEP 7 — MAKE THE ENEMY CHASE
+  // ====================================================
   //
-  // When the player collects the coin...
+  // The enemy needs to move towards the player.
   //
-  // Increase the score.
+  // Ask:
   //
-  // Hint:
+  // Is enemyX less than playerX?
   //
-  // score++;
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 6
+  // Is enemyX greater than playerX?
   //
-  // Move the coin somewhere new.
-  //
-  // Hint:
-  //
-  // random(...)
-  //
-  // Keep the coin on the screen.
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 7
-  //
-  // Clear the OLED.
-  //
-  // Hint:
-  //
-  // display.clearDisplay();
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 8
-  //
-  // Draw the player.
-  //
-  // Hint:
-  //
-  // drawPlayer();
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 9
-  //
-  // Draw the coin.
-  //
-  // Hint:
-  //
-  // drawCoin();
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 10
-  //
-  // Display the score.
-  //
-  // It should look something like:
-  //
-  // Score: 3
+  // Then do the same thing for Y.
   //
   // Hints:
   //
-  // display.setCursor(...)
-  // display.print(...)
-  //------------------------------------------------------
-
-
-
-  //------------------------------------------------------
-  // STEP 11
+  // if(enemyX < playerX)
+  // if(enemyX > playerX)
   //
-  // Show everything on the OLED.
+  // if(enemyY < playerY)
+  // if(enemyY > playerY)
   //
-  // Hint:
+  // Use enemySpeed.
+  //
+  // ====================================================
+
+
+
+  // ====================================================
+  // STEP 8 — AABB ENEMY COLLISION
+  // ====================================================
+  //
+  // Now use AABB again!
+  //
+  // This time compare:
+  //
+  // PLAYER
+  // +
+  // ENEMY
+  //
+  // All FOUR checks must be true.
+  //
+  // Horizontal:
+  //
+  // playerX < enemyX + enemySize
+  //
+  // playerX + playerSize > enemyX
+  //
+  // Vertical:
+  //
+  // playerY < enemyY + enemySize
+  //
+  // playerY + playerSize > enemyY
+  //
+  // If all four are true:
+  //
+  // THE ENEMY CAUGHT YOU!
+  //
+  // ====================================================
+
+
+
+  // ====================================================
+  // STEP 9 — WHAT HAPPENS WHEN YOU GET CAUGHT?
+  // ====================================================
+  //
+  // Decide what happens.
+  //
+  // For example:
+  //
+  // • Reset the score
+  // • Return the player to the starting position
+  // • Move the enemy somewhere else
+  //
+  // ====================================================
+
+
+
+  // ====================================================
+  // STEP 10 — DRAW THE GAME
+  // ====================================================
+  //
+  // Clear the screen.
+  //
+  // Draw:
+  //
+  // • Player
+  // • Coin
+  // • Enemy
+  //
+  // Display the score.
+  //
+  // Finally:
   //
   // display.display();
-  //------------------------------------------------------
+  //
+  // ====================================================
 
 
 
